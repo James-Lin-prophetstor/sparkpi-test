@@ -1,0 +1,11 @@
+apiVersion: autoscaling.containers.ai/v1alpha1
+kind: AlamedaScaler
+metadata:
+  name: alameda
+  namespace: spark-cluster
+spec:
+  policy: stable
+  enable: true
+  selector:
+    matchLabels:
+      app: sparkpi
