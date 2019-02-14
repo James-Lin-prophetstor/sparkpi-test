@@ -5,6 +5,7 @@ import time
 
 Interval = int(input("Set interval for logger(minutes): "))
 Script_Duration = int(input("Set how long will in test(miutes): "))
+ProjectName = str(input("Which project is installed sparkpi: "))
 Date = str(time.strftime("%Y-%m-%d-%H%M%S", time.localtime()))
 alameda_recommendation_log = "/root/alameda_recommendation-" + \
                             str(Interval) + "M" + \
@@ -22,10 +23,10 @@ def alameda_monitor():
     sparkpi_dc_resources = spark_dc_json["spec"]["template"]["spec"]["containers"][0]["resources"]
     print(Log_time + " " + "Set sparkpi containers deploymentconfig.\n\n")
     print(Log_time + " " + "sparkpi resources:\n" + json.dumps(sparkpi_dc_resources, indent=2) + "\n\n")
-    get_running_sparkpi_pod = "oc get pod -n spark-cluster -o=name|grep sparkpi |grep -v build"
+    get_running_sparkpi_pod = "oc get pod -n "+ProjectName+" -o=name|grep sparkpi |grep -v build"
     get_running_sparkpi_pod_cmd = os.popen(get_running_sparkpi_pod).read()
     pod_name = str(get_running_sparkpi_pod_cmd).split("/")[1].rstrip()
-    alamedarecommendation = "oc get alamedarecommendation "+pod_name+" -n spark-cluster -o json"
+    alamedarecommendation = "oc get alamedarecommendation "+pod_name+" -n "+ProjectName+" -o json"
     output = os.popen(alamedarecommendation).read()
     predict_resources = json.loads(output)["spec"]["containers"][0]["resources"]
     print(Log_time + " " + "sparkpi alameda recommendations: \n" + json.dumps(predict_resources, indent=2) + "\n\n")
@@ -39,10 +40,10 @@ for count in range(0, Test_times, 1):
     alameda_monitor()
     Interval_sec = int(Interval) * 60
     time.sleep(Interval_sec)
-    get_running_sparkpi_pod = "oc get pod -n spark-cluster -o=name|grep sparkpi |grep -v build"
+    get_running_sparkpi_pod = "oc get pod -n "+ProjectName+" -o=name|grep sparkpi |grep -v build"
     get_running_sparkpi_pod_cmd = os.popen(get_running_sparkpi_pod).read()
     pod_name = str(get_running_sparkpi_pod_cmd).split("/")[1].rstrip()
-    check_recommendation = "oc get alamedarecommendation -n spark-cluster"
+    check_recommendation = "oc get alamedarecommendation -n "+ProjectName
     check_recommendation_cmd = os.popen(check_recommendation).read()
     while pod_name not in check_recommendation_cmd:
         time.sleep(10)
