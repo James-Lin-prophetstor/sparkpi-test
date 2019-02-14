@@ -157,7 +157,12 @@ echo "## command:"
 echo "oc cluster up --public-hostname=${IP_ADDRESS}  --base-dir=${OC_BASE_DIR}"
 oc cluster up --public-hostname=${IP_ADDRESS} --base-dir=${OC_BASE_DIR}
 cat >>${OC_CLUSTER_UP} <<'EOF'
-LOCAL_IP=$(ip address show | grep 'ens' |grep 'inet ' |awk '{print $2}' |awk -F/ '{print $1}' )
+LOCAL_IP=`cat /etc/sysconfig/network-scripts/ifcfg-*| 
+    grep IPADDR | 
+    grep -v '127.0.0.1' |
+    awk -F= '{print $2}' |
+    sed "s/\"//g"`
+
 BASE_DIR=/opt/oc
 OC=/usr/local/bin/oc
 
