@@ -12,6 +12,8 @@ alameda_recommendation_log = "/root/alameda_recommendation-" + \
                             str(Script_Duration) + "M" + \
                             Date+".log"
 
+OC_GET_POD="oc get pod -n "+ProjectName
+OC_GET_RECOMMENDATION="oc get alamedarecommendation "
 
 def alameda_monitor():
     print("#"*30)
@@ -23,11 +25,11 @@ def alameda_monitor():
     sparkpi_dc_resources = spark_dc_json["spec"]["template"]["spec"]["containers"][0]["resources"]
     print(Log_time + " " + "Set sparkpi containers deploymentconfig.\n\n")
     print(Log_time + " " + "sparkpi resources:\n" + json.dumps(sparkpi_dc_resources, indent=2) + "\n\n")
-    get_running_sparkpi_pod = "oc get pod -n "+ProjectName+" -o=name|grep sparkpi |grep -v build"
+    get_running_sparkpi_pod =OC_GET_POD+" -o=name|grep sparkpi |grep -v build"
     get_running_sparkpi_pod_cmd = os.popen(get_running_sparkpi_pod).read()
     pod_name = str(get_running_sparkpi_pod_cmd).split("/")[1].rstrip()
-    alamedarecommendation = "oc get alamedarecommendation "+pod_name+" -n "+ProjectName+" -o json"
-    output = os.popen(alamedarecommendation).read()
+    recommendation = OC_GET_RECOMMENDATION+pod_name+" -n "+ProjectName+" -o json"
+    output = os.popen(recommendation).read()
     predict_resources = json.loads(output)["spec"]["containers"][0]["resources"]
     print(Log_time + " " + "sparkpi alameda recommendations: \n" + json.dumps(predict_resources, indent=2) + "\n\n")
     log = open(alameda_recommendation_log, "a")
@@ -40,10 +42,10 @@ for count in range(0, Test_times, 1):
     alameda_monitor()
     Interval_sec = int(Interval) * 60
     time.sleep(Interval_sec)
-    get_running_sparkpi_pod = "oc get pod -n "+ProjectName+" -o=name|grep sparkpi |grep -v build"
+    get_running_sparkpi_pod = OC_GET_POD+" -o=name|grep sparkpi |grep -v build"
     get_running_sparkpi_pod_cmd = os.popen(get_running_sparkpi_pod).read()
     pod_name = str(get_running_sparkpi_pod_cmd).split("/")[1].rstrip()
-    check_recommendation = "oc get alamedarecommendation -n "+ProjectName
+    check_recommendation = OC_GET_RECOMMENDATION+"-n "+ProjectName
     check_recommendation_cmd = os.popen(check_recommendation).read()
     while pod_name not in check_recommendation_cmd:
         time.sleep(10)
