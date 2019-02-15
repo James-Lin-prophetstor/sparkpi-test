@@ -5,14 +5,14 @@ import time
 
 Interval = int(input("Set interval for logger(minutes): "))
 Script_Duration = int(input("Set how long will in test(miutes): "))
-ProjectName = str(input("Which project is installed sparkpi: "))
+Project_Name = str(input("Which project is installed sparkpi: "))
 Date = str(time.strftime("%Y-%m-%d-%H%M%S", time.localtime()))
 alameda_recommendation_log = "/root/alameda_recommendation-" + \
                             str(Interval) + "M" + \
                             str(Script_Duration) + "M" + \
                             Date+".log"
 
-OC_GET_POD="oc get pod -n "+ProjectName
+OC_GET_POD="oc get pod -n "+Project_Name
 OC_GET_RECOMMENDATION="oc get alamedarecommendation "
 
 def alameda_monitor():
@@ -28,7 +28,7 @@ def alameda_monitor():
     get_running_sparkpi_pod =OC_GET_POD+" -o=name|grep sparkpi |grep -v build"
     get_running_sparkpi_pod_cmd = os.popen(get_running_sparkpi_pod).read()
     pod_name = str(get_running_sparkpi_pod_cmd).split("/")[1].rstrip()
-    recommendation = OC_GET_RECOMMENDATION+pod_name+" -n "+ProjectName+" -o json"
+    recommendation = OC_GET_RECOMMENDATION+pod_name+" -n "+Project_Name+" -o json"
     output = os.popen(recommendation).read()
     predict_resources = json.loads(output)["spec"]["containers"][0]["resources"]
     print(Log_time + " " + "sparkpi alameda recommendations: \n" + json.dumps(predict_resources, indent=2) + "\n\n")
@@ -45,7 +45,7 @@ for count in range(0, Test_times, 1):
     get_running_sparkpi_pod = OC_GET_POD+" -o=name|grep sparkpi |grep -v build"
     get_running_sparkpi_pod_cmd = os.popen(get_running_sparkpi_pod).read()
     pod_name = str(get_running_sparkpi_pod_cmd).split("/")[1].rstrip()
-    check_recommendation = OC_GET_RECOMMENDATION+"-n "+ProjectName
+    check_recommendation = OC_GET_RECOMMENDATION+"-n "+Project_Name
     check_recommendation_cmd = os.popen(check_recommendation).read()
     while pod_name not in check_recommendation_cmd:
         time.sleep(10)

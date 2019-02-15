@@ -20,6 +20,7 @@ date
 #=======================================================
 echo "## Step 1:  OS version confirm: "
 echo "## Only for CentOS Linux release 7.5.1804 (Core) and later"
+echo "## Create a standalone openshift 3.11 OKD test environment by 'oc cluster up'."
 echo "System:"
 uname -a
 cat /etc/redhat-release
