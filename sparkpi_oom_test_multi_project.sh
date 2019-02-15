@@ -1,5 +1,5 @@
 #!/bin/bash
-vim: ts=4 sw=4 et smarttab
+: ts=4 sw=4 et smarttab
 #Check sparkpi running
 if [ -x /usr/local/bin/oc ]; then 
     export OC=/usr/local/bin/oc
