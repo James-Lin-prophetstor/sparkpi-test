@@ -1,4 +1,5 @@
 #!/bin/bash
+vim: ts=4 sw=4 et smarttab
 #Check sparkpi running
 export OC=/usr/local/bin/oc
 read -p "Spark project name on openshift: " PROJECT

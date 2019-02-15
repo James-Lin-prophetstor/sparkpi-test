@@ -1,5 +1,5 @@
 #/bin/sh
-:set ts=4 st=4 sw=4 et cul smarttab
+vim: ts=4 sw=4 et smarttab
 DOCKER_DAEMON_JSON=/etc/docker/daemon.json
 OC_URL="https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz"
 OC_FILENAME_TARGZ=`basename ${OC_URL}`
@@ -27,7 +27,7 @@ date
 echo "## Step 1:  OS confirm: "
 echo "## Only for CentOS Linux release 7.5.1804 (Core) and later"
 echo "## Create a standalone openshift 3.11 OKD test environment by 'oc cluster up'."
-echo "Install helm, sparkpi on openshift"
+echo "## Install helm, sparkpi on openshift"
 echo "System:"
 uname -a
 cat /etc/redhat-release
@@ -217,12 +217,12 @@ while true ; do
 		    break
 	  fi
 done
-sleep 5
 echo
-helm version
+sleep 20
 echo "## Map RBAC (role-based access control) to tiller "
 oc adm policy add-scc-to-user anyuid system:serviceaccount:kube-system:tiller
 oc adm policy add-scc-to-group anyuid system:authenticated
+helm version
 echo
 
 date
@@ -250,4 +250,5 @@ date
 # $SPARKPI_OC get pod
 # echo "## oc get $SPARKPI_PROJECT route"
 # $SPARKPI_OC get route
-# echo "## Finished."
+oc get pod --all-namespaces
+echo "## Finished."
