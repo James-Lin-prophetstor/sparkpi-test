@@ -44,8 +44,8 @@ echo "## Install required packeds: yum-utils device-mapper-persistent-data lvm2 
 sudo yum clean all
 sudo yum install -y yum-utils \
   device-mapper-persistent-data \
-  lvm2 \ 
-  screen \ 
+  lvm2 \
+  screen \
   git
 
 echo  "## Add docker-ce edge repo to yum repository"  
@@ -155,8 +155,10 @@ date
 #=======================================================
 echo "## Step 6: start up oc cluster"
 echo "## command:"
-echo "oc cluster up --public-hostname=${IP_ADDRESS}  --base-dir=${OC_BASE_DIR}"
-oc cluster up --public-hostname=${IP_ADDRESS} --base-dir=${OC_BASE_DIR}
+echo "oc cluster up --public-hostname=${IP_ADDRESS} --base-dir=${OC_BASE_DIR}"
+oc cluster up \
+  --public-hostname=${IP_ADDRESS} \
+  --base-dir=${OC_BASE_DIR}
 cat >>${OC_CLUSTER_UP} <<'EOF'
 LOCAL_IP=`cat /etc/sysconfig/network-scripts/ifcfg-*| 
     grep IPADDR | 

@@ -36,7 +36,7 @@ def alameda_monitor():
     log.write(Log_time + " " + str(predict_resources) + "\n")
     log.close()
 
-
+    
 Test_times = int(Script_Duration / int(Interval))
 for count in range(0, Test_times, 1):
     alameda_monitor()
@@ -51,4 +51,5 @@ for count in range(0, Test_times, 1):
         time.sleep(10)
         print(Log_time + " " + "Waiting for recommendation up.\n\n")
         check_recommendation_cmd = os.popen(check_recommendation).read()
+
 
