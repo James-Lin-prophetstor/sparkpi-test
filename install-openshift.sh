@@ -250,5 +250,6 @@ date
 # $SPARKPI_OC get pod
 # echo "## oc get $SPARKPI_PROJECT route"
 # $SPARKPI_OC get route
+echo "oc get pod --all-namespaces"
 oc get pod --all-namespaces
 echo "## Finished."
