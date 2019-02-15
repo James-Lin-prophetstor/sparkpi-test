@@ -43,10 +43,11 @@ done
 echo "## Install required packeds: yum-utils device-mapper-persistent-data lvm2 screen git"
 sudo yum clean all
 sudo yum install -y yum-utils \
-  device-mapper-persistent-data \
-  lvm2 \
-  screen \
-  git
+                    device-mapper-persistent-data \
+                    lvm2 \
+                    screen \
+                    git \
+                    NetworkManager-tui
 
 echo  "## Add docker-ce edge repo to yum repository"  
 cat >${DOCKER_CE_REPO} <<'EOF'
@@ -183,4 +184,10 @@ date
 #=======================================================
 echo "## Step 7: oc login -u system:admin"
 oc login -u system:admin
+echo "## Step 8: create a user admin as cluster administrator"
+oc create user admin
+oc adm policy add-cluster-role-to-user cluster-admin admin
+
+echo "## Step 9 Install helm on openshift"
+echo "## Step 10 Install sparkpi of openshift"
 echo "## Finished."
