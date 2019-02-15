@@ -222,6 +222,7 @@ sleep 20
 echo "## Map RBAC (role-based access control) to tiller "
 oc adm policy add-scc-to-user anyuid system:serviceaccount:kube-system:tiller
 oc adm policy add-scc-to-group anyuid system:authenticated
+echo "## Get helm & tiller version"
 helm version
 echo
 
