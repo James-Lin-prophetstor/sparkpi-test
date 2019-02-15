@@ -5,7 +5,7 @@ import time
 
 Interval = int(input("Set interval for logger(minutes): "))
 Script_Duration = int(input("Set how long will in test(miutes): "))
-Project_Name = str(input("Which project is installed sparkpi: "))
+Project_Name = raw_input("Project name for sparkpi: ")
 Date = str(time.strftime("%Y-%m-%d-%H%M%S", time.localtime()))
 alameda_recommendation_log = "/root/alameda_recommendation-" + \
                             str(Interval) + "M" + \
