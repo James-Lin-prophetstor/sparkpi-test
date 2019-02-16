@@ -10,40 +10,34 @@ fi
 
 echo "Test SparkPI on Openshift 3.11 with Alameda on CentOS 7.6 and later"
 echo " "
-
 echo "## Enter projects by space; like, project-1 project-2 project-3"
-read -p "Spark projects on openshift: " NAMESPACES
+read -p "Spark projects on openshift: " PROJECT_LIST
 
 # login oc cluster
 login_oc()
 {
     read -p "Openshift cluster user: " USER
     read -p "Openshift cluster user password: " PASSWORD
-    $OC login -u $USER -p $PASSWORD 2>&1 > /dev/null
-    for PROJECT in NAMESPACES; do
-        USE_NAMESPACE=`$OC project $PROJECT `
-        echo $USE_NAMESPACE
-    done
+    LOGIN=`$OC login -u $USER -p $PASSWORD`
+    echo $LOGIN
 }
-    
 TEST_LOGIN_OC=$(login_oc)
 echo $TEST_LOGIN_OC
 
 # shift to project spark-cluster and check running state
-STAT()
+stat()
 {
     POD=`$OC get pod -n $PROJECT | grep 'sparkpi-'|grep -v build|cut -d ' ' -f1`
-    STAT=`$OC describe pod $POD |grep 'State'`
+    STAT=`$OC describe pod $POD -n $PROJECT |grep 'State'`
     echo $STAT
 }
-
-for PROJECT in NAMESPACES ; do
-    STAT=$(STAT)
+for PROJECT in $PROJECT_LIST ; do
+    STAT=$(stat)
     if [[ ${STAT} != *'Running'* ]]; then
-        echo "Sparkpi is not Running on project: $PROJECT ."
+        echo "Sparkpi is not Running on project: $PROJECT "
         exit 1
     else
-        echo "Sparkpi is Running on project: $PROJECT."
+        echo "Sparkpi is Running on project: $PROJECT "
     fi
 done
 
@@ -54,7 +48,6 @@ read -p "Set interval(minutes) for logger: " LOG_INTERVAL
 read -p "Set how long will in test(miutes): " TERM
 read -p "Test with Alameda enabled(y/n)? " ALAMEDA_ENABLE
 read -p "SPARKPI resources had limit (y/n)?" RESOURCE_LIMT
-
 if [[ ${ALAMEDA_ENABLE} == 'y'* ]]; then
     INITIAL='sparkpi_alameda_enabled'
 else
@@ -66,25 +59,18 @@ if [[ ${RESOURCE_LIMT} == 'y'* ]]; then
 else
     LIMIT="mem_limit_no"
 fi
-
-
-LOG_FILE="${INITIAL}_${DATE}_${INTERVAL}S_${LOG_INTERVAL}M_${TERM}M.log"
-touch ./$LOG_FILE
-SPARKPI_LOG="${INITIAL}_${DATE}_${INTERVAL}S_${LOG_INTERVAL}M_${TERM}M_Sparkpi_Stats_${LIMIT}.log"
-touch ./$SPARKPI_LOG
 export INTERVAL LOG_INTERVAL TERM
 
 COUNT=$((${TERM}*60/${INTERVAL}))
-
+export COUNT
 Check_sparkpi_stat()
 {
-    Stat=$(STAT)
+    STAT=$(stat)
     until [[ $Stat == *'Running'* ]] ; do
-        Stat=$(STAT)
+        STAT=$(stat)
         sleep 1
    done
 }
-
 
 # Write docker stats and test results to logs
 LOGGER()
@@ -100,27 +86,42 @@ LOGGER()
                 alameda-ai 
                 alameda_operator 
                 datahub"
-    DOCKER_STATS='docker stats --no-stream'
-    HEAD_LINE=$($DOCKER_STATS | head -n 1 | awk '{print $1" "$2"\t"$3"\t"$4" "$5 "\t"$6" "$7" "$8" "$9 }')
-    for Pod in Pod_list ; do
+    Docker_Stats="docker stats --no-stream"
+    Awk_Headline="awk '{print $1" "$2"\t"$3"\t"$4" "$5 "\t"$6" "$7" "$8" "$9 }')"
+    Awk="awk '{print $1" "$2"\t"$3"\t"$4" "$5" "$6}'"
+    HEAD_LINE=$($Docker_Stats | head -n 1 | $Awk_Headline )
+    
+    for Project in $PROJECT_LIST ; do
+        Log_file="${INITIAL}_${DATE}_${INTERVAL}S_${LOG_INTERVAL}M_${TERM}M_${Project}.log"
+        touch ./$Log_file
+        Sparkpi_Log="${INITIAL}_${DATE}_${INTERVAL}S_${LOG_INTERVAL}M_${TERM}M_Sparkpi_Stats_${project}_${LIMIT}.log"
+        touch ./$Sparkpi_Log
+    done
+
+    for Pod in $Pod_list ; do
         ${Pod}_LOG="${INITIAL}_${DATE}_${INTERVAL}S_${LOG_INTERVAL}M_${TERM}M_${Pod}_${LIMIT}.log"
         touch ./${${Pod}_LOG}
         echo "$Date  $HEAD_LINE " > ${${Pod}_LOG}
     done
+    
     # trigger loggers 
     LOGCOUNT=$((${TERM}/${LOG_INTERVAL}))
     echo "log times $LOGCOUNT"
     for LOGTEST in `seq 0 1 ${LOGCOUNT}` ; do
-        Check_sparkpi_stat
-        RESTARTS=`oc get pods | grep sparkpi- |grep -v build |awk '{print $4}'`
-        DETAILS=`oc get pods -n $PROJECT `
-        Date=$(date +%Y-%m-%d-%H:%M:%S)
-        echo "$Date SPARkPI OOM RESTARTS TIME: $RESTARTS" >> ${LOG_FILE}
-        echo "$Date $DETAILS " >> ${LOG_FILE}
-        Awk="awk '{print $1" "$2"\t"$3"\t"$4" "$5" "$6}' "
-        Sparkpi_Stat=$($DOCKER_STATS | $Awk | grep 'sparkpi' | grep -v 'POD')
-        for Pod in Pod_list ; do
-                ${Pod}_Stat=$($DOCKER_STATS | $Awk | grep ${Pod} | grep -v 'POD')
+        for PROJECT in $PROJECT_LIST ; do
+            Check_sparkpi_stat
+        done
+        
+        for PROJECT in $PROJECT_LIST ; do
+            Restarts=`oc get pods | grep sparkpi- |grep -v build |awk '{print $4}'`
+            Details=`oc get pods -n $PROJECT `
+            echo "$Date SPARkPI OOM RESTARTS TIME: $Restarts" >> ${Log_file}
+            echo "$Date $Details " >> ${Log_file}
+            Sparkpi_Stat=$($Docker_Stats | $Awk | grep 'sparkpi' | grep -v 'POD')
+            echo "$Date  $Sparkpi_Stat " >> $Sparkpi_Log
+        done
+        for Pod in $Pod_list ; do
+                ${Pod}_Stat=$($Docker_Stats | $Awk | grep ${Pod} | grep -v 'POD')
                 echo "$Date  ${${Pod}_Stat} " >> ${${Pod}_LOG}
         done
         LOG_INTERVAL_SEC=$(($LOG_INTERVAL*60))
