@@ -4,6 +4,11 @@ DOCKER_DAEMON_JSON=/etc/docker/daemon.json
 OC_URL="https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz"
 OC_FILENAME_TARGZ=`basename ${OC_URL}`
 OC_LOGIN="oc login -u admin -p password"
+DOCKER_CE_REPO=/etc/yum.repos.d/docker-ce.repo
+OC_BASE_DIR=/opt/oc/
+OC_CLUSTER_UP=/usr/local/sbin/oc_cluster_up.sh
+mkdir -p $OC_BASE_DIR
+SELINUX=/etc/selinux/config
 HELM_URL="https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz"
 TILLER_URL="https://github.com/openshift/origin/raw/master/examples/helm/tiller-template.yaml"
 SPARKPI_RESOURCE="https://radanalytics.io/resources.yaml"
@@ -15,12 +20,6 @@ IP_ADDRESS=`cat /etc/sysconfig/network-scripts/ifcfg-*|
             grep -v '127.0.0.1' |
             awk -F= '{print $2}' |
             sed "s/\"//g"`
-
-DOCKER_CE_REPO=/etc/yum.repos.d/docker-ce.repo
-OC_BASE_DIR=/opt/oc/
-OC_CLUSTER_UP=/usr/local/sbin/oc_cluster_up.sh
-mkdir -p $OC_BASE_DIR
-SELINUX=/etc/selinux/config
 
 date
 #=======================================================
