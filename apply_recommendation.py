@@ -18,6 +18,10 @@ pod_restart_resources_log = "/root/pod_restart_resources-" + \
                             str(Interval) + "M" + \
                             str(Script_Duration) + "M" + \
                             Date+".log"
+# read sparkpi config into a JSON file
+# check the resources in the config
+# read alameda recommendation into a JSON file
+# apply new resources of memory limits and requests 
 def alameda_test():
     print("#"*30)
     global Log_time
