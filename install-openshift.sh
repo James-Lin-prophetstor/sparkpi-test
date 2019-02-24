@@ -36,8 +36,10 @@ read -p "Press Enter to install or CTRL-C to exit"
 echo "## Disable selinux first"
 for SETTING in enforcing permissive ; do
     if grep "SELINUX=${SETTING}" $SELINUX ; then
+        echo -e "======================================================="
         echo "Please reboot server once for SELINUX disabled, now."
         echo "And run this script again."
+        echo -e "======================================================="
         echo -e "\n\n"
         sed -i -e "s/SELINUX=${SETTING}/SELINUX=disabled/" $SELINUX
         echo "## Configure:"
