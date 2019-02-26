@@ -15,12 +15,7 @@ SPARKPI_RESOURCE="https://radanalytics.io/resources.yaml"
 SPARKPI_PROJECT="spark-cluster"
 SPARKPI_EXAMPLE="https://github.com/radanalyticsio/tutorial-sparkpi-python-flask.git"
 SPARKPI_OC="oc -n $SPARKPI_PROJECT"
-IP_ADDRESS=`cat /etc/sysconfig/network-scripts/ifcfg-*| 
-            grep IPADDR | 
-            grep -v '127.0.0.1' |
-            awk -F= '{print $2}' |
-            sed "s/\"//g"`
-
+IP_ADDRESS=$(ip route get 8.8.8.8 | awk '{print $NF; exit}')
 date
 #=======================================================
 echo "## Step 1:  OS confirm: "
@@ -170,11 +165,7 @@ oc cluster up \
   --public-hostname=${IP_ADDRESS} \
   --base-dir=${OC_BASE_DIR}
 cat >>${OC_CLUSTER_UP} <<'EOF'
-IP_ADDRESS=`cat /etc/sysconfig/network-scripts/ifcfg-*| 
-    grep IPADDR | 
-    grep -v '127.0.0.1' |
-    awk -F= '{print $2}' |
-    sed "s/\"//g"`
+IP_ADDRESS=$(ip route get 8.8.8.8 | awk '{print $NF; exit}')
 
 BASE_DIR=/opt/oc
 OC=/usr/local/bin/oc
@@ -228,30 +219,30 @@ helm version
 echo
 
 date
-# #=======================================================
-# echo "## Step 9: Install Sparkpi on openshift "
-# oc new-project ${SPARKPI_PROJECT} 
-# oc project ${SPARKPI_PROJECT}
-# oc create -f ${SPARKPI_RESOURCE}
-# oc new-app \
-#         --template oshinko-python-spark-build-dc \
-#         -p APPLICATION_NAME=sparkpi \
-#         -p GIT_URI=${SPARKPI_EXAMPLE}
-# while true ; do
-#     if oc get bc | grep sparkpi ; then
-#         break
-#     fi
-# done
-# sleep 5
+#=======================================================
+echo "## Step 9: Install Sparkpi on openshift "
+oc new-project ${SPARKPI_PROJECT} 
+oc project ${SPARKPI_PROJECT}
+oc create -f ${SPARKPI_RESOURCE}
+oc new-app \
+        --template oshinko-python-spark-build-dc \
+        -p APPLICATION_NAME=sparkpi \
+        -p GIT_URI=${SPARKPI_EXAMPLE}
+while true ; do
+    if oc get bc | grep sparkpi ; then
+        break
+    fi
+done
+sleep 5
 
-# oc logs -f bc/sparkpi
-# oc expose svc/sparkpi
-# echo "## oc get $SPARKPI_PROJECT status"
-# $SPARKPI_OC status 
-# echo "## oc get $SPARKPI_PROJECT pods"
-# $SPARKPI_OC get pod
-# echo "## oc get $SPARKPI_PROJECT route"
-# $SPARKPI_OC get route
+oc logs -f bc/sparkpi
+oc expose svc/sparkpi
+echo "## oc get $SPARKPI_PROJECT status"
+$SPARKPI_OC status 
+echo "## oc get $SPARKPI_PROJECT pods"
+$SPARKPI_OC get pod
+echo "## oc get $SPARKPI_PROJECT route"
+$SPARKPI_OC get route
 echo "oc get pod --all-namespaces"
 oc get pod --all-namespaces
 echo "## Finished."
