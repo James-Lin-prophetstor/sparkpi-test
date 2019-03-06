@@ -12,12 +12,14 @@ import json
 
 User = raw_input("Project user: ")
 Password = raw_input("User password: ")
+
 # Test to login oc into the project
 CMD = 'oc login -u '+User+' -p '+Password
 subprocess.check_call([CMD],shell=True)
 Project = raw_input("Project Name: ")
 CMD = 'oc project '+Project
 subprocess.check_call([CMD],shell=True)
+
 # Set parameters
 Interval = int(input("Set interval for logger (minutes): "))
 Script_Duration = int(input("Set how long will in monitoring (miutes): "))
@@ -48,6 +50,7 @@ for Pod in OC_pods:
 print("pod in project")
 print(List_pod)
 print("*"*20)
+
 # get docker ID's and NAME's mapping
 CMD = 'docker ps --format "{{.ID}}\t{{.Names}}"'
 DOCKERS = os.popen(CMD).read()
@@ -67,6 +70,7 @@ for ID, Name in DICT_ID.items():
 print("POD ID & Name in project" )
 print(json.dumps(DICT_POD_IN_PROJECT))
 print("*"*20)
+
 # get docker stats for pods in the project
 Test_times = int(Script_Duration / Interval)
 for count in range(0, Test_times, 1):
