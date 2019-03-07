@@ -22,7 +22,7 @@ NAME = './pod_in_'+Project+'-'+\
         str(Interval)+'M-'+\
         str(Script_Duration)+'M-'+\
         str(Date)+"-"
-LOG = NAME+'docker_stats'+'.log'
+LOG = NAME+'alamedarecommendation'+'.log'
 OC_GET_POD = "oc get pod -n "
 OC_GET_POD_IN_PROJECT = OC_GET_POD + Project
 OC_GET_POD_LOG = NAME+'oc_get_pod'+'.log'
@@ -31,10 +31,10 @@ OC_GET_POD_LOG = NAME+'oc_get_pod'+'.log'
 CMD = 'oc login -u '+User+' -p '+Password
 subprocess.check_call([CMD],shell=True)
 CMD = 'oc project '+Project
-subprocess.call([CMD],shell=True)
+subprocess.check_call([CMD],shell=True)
 print("*"*20)
 
-# get pods NAME in an oc project 
+# Get pods NAME in an oc project 
 CMD = 'oc get pod -n '+Project+' -o=NAME'
 OC_pods = subprocess.Popen([CMD], stdout=subprocess.PIPE,
     shell=True).communicate()[0].splitlines()
@@ -45,13 +45,12 @@ print("pod in project")
 print(List_pod)
 print("*"*20)
 
-#get alameda scaler 
+# Get alameda scaler 
 CMD = "oc get alamedascaler --all-namespaces -o json"
 AlamedaScaler = os.popen(CMD).read()
-print(AlamedaScaler)
 
 print("*"*20)
-# get alameda recommendation list
+# Get alameda recommendation list
 CMD = "oc get alamedarecommendation -n "+Project
 RES = os.popen(CMD).read()
 LIST = []
@@ -63,12 +62,25 @@ if "NAME" in LIST:
 print("Name in alameda recommendation on project:", Project)
 print(LIST)
 
-# get recommendation values in pods
-for LINE in LIST:
-        CMD = "oc get alamedarecommendation -n "+Project
-        CMD = CMD+" "+LINE+" -o json"
-        CMD = os.popen(CMD).read()
-        CMD = json.load(CMD)
-        print(json.dumps(CMD)
-        
-        
+print("*"*20)
+# Get recommendation values in pods
+Test_times = int(Script_Duration / int(Interval))
+Interval_sec = int(Interval) * 60
+for count in range(0, Test_times, 1):
+    Date = time.strftime("%Y-%m-%d-%H%M%S", time.localtime())
+    print("recommendation on POD:")
+    with open(LOG, 'a') as file:
+        for LINE in LIST:
+            CMD = "oc get alamedarecommendation -n "+Project
+            CMD = CMD+" "+LINE+" -o json"
+            CMD = os.popen(CMD).read()
+            CMD = json.loads(CMD)
+            CMD = CMD["spec"]["containers"][0]["resources"]
+            RES = (Date, LINE, CMD)
+            print(RES)
+            file.write(str(RES)+"\n")
+    file.close()
+    print("\n"*5)
+    time.sleep(Interval_sec)
+print("Monitor done. log file: ", LOG)
+print("\n")
