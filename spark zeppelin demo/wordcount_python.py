@@ -33,9 +33,9 @@ def removePunctuation(column):
     return trim(lower(regexp_replace(column, '[^A-Za-z0-9 ]', ''))).alias('sentence')
 
 from pyspark.sql.functions import desc
-for X in range(0,12,1):
-    fileName = "/opt/zeppelin/notebook/Dante\'s_Inferno.txt"
-    shakespeareDF = sqlContext.read.text(fileName).select(removePunctuation(col('value')))
-    topWordsAndCountsDF = wordCount(shakeWordsDF).orderBy('count',ascending=False)
-    topWordsAndCountsDF.show(1000)
-    time.sleep(300)
+#import urllib2
+#fileName = urllib2.urlopen('https://raw.githubusercontent.com/eformat/kubernetes-spark/master/data/shakespeare/hamlet.txt').read()
+fileName = "/opt/zeppelin/notebook/Dante\'s_Inferno.txt"
+shakespeareDF = sqlContext.read.text(fileName).select(removePunctuation(col('value')))
+topWordsAndCountsDF = wordCount(shakeWordsDF).orderBy('count',ascending=False)
+topWordsAndCountsDF.show(1000)
