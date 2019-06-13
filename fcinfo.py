@@ -1,15 +1,11 @@
 #!/usr/bin/python
 
-def StringAdjust(word):
-    if len(word) < 24:
-        word = word.ljust(24)
-    else:
-        word = word
-    return word
-
 def fcinfo():
     import glob
+    import os
     Sys = '/sys/class/fc_host/'
+    if not os.path.isdir(Sys):
+        raise RuntimeError("No FC card")
     glob.glob(Sys)
     hosts = glob.glob(Sys+'*')
     
