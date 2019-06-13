@@ -3,11 +3,11 @@
 def fcinfo():
     import glob
     import os
-    Sys = '/sys/class/fc_host/'
-    if not os.path.isdir(Sys):
+    fc_host = '/sys/class/fc_host/'
+    if not os.path.isdir(fc_host):
         raise RuntimeError("No FC card")
-    glob.glob(Sys)
-    hosts = glob.glob(Sys+'*')
+    glob.glob(fc_host)
+    hosts = glob.glob(fc_host+'*')
     
     dic_hosts_name = {}
     for x in hosts:
