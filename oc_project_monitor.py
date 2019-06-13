@@ -9,51 +9,54 @@ import StringIO
 import subprocess
 import time
 import json
-
-User = raw_input("Project user: ")
-Password = raw_input("User password: ")
-
-# Test to login oc into the project
-CMD = 'oc login -u '+User+' -p '+Password
-subprocess.check_call([CMD],shell=True)
-Project = raw_input("Project Name: ")
-CMD = 'oc project '+Project
-subprocess.check_call([CMD],shell=True)
+from oc import OC
 
 # Set parameters
-Interval = int(input("Set interval for logger (minutes): "))
-Script_Duration = int(input("Set how long will in monitoring (miutes): "))
+User = "admin"
+Password = "password"
+Namespace = "test"
+Ip = "172.31.4.200"
+Interval = 5 # logger interval time (minutes)
+Script_Duration = 60 # how long script monitoring time (minutes)
 Date = time.strftime("%Y-%m-%d-%H%M%S", time.localtime())
-NAME = './pod_in_'+Project+'-'+\
+NAME = './pod_in_'+Namespace+'-'+\
         str(Interval)+'M-'+\
         str(Script_Duration)+'M-'+\
         str(Date)+"-"
 LOG = NAME+'docker_stats'+'.log'
-OC_GET_POD = "oc get pod -n "
-OC_GET_POD_IN_PROJECT = OC_GET_POD + Project
 OC_GET_POD_LOG = NAME+'oc_get_pod'+'.log'
 
-# Test to login oc into the project
-CMD = 'oc login -u '+User+' -p '+Password
-subprocess.check_call([CMD],shell=True)
-CMD = 'oc project '+Project
-subprocess.call([CMD],shell=True)
+
+# Test to login oc and go into the project
+
+oc = OC(User, Password, Ip)
+output = oc.login()
+print(output)
+output = oc.project(Namespace)
+print(output)
+listpod = str(oc.get("pod -o name")).split("\n")
+print(listpod)
 print("*"*20)
 
-# get pods NAME in an oc project 
-CMD = 'oc get pod -n '+Project+' -o=NAME'
-OC_pods = subprocess.Popen([CMD], stdout=subprocess.PIPE,
-    shell=True).communicate()[0].splitlines()
-List_pod = []
-for Pod in OC_pods:
-    List_pod.append(Pod.split("/")[1])
-print("pod in project")
-print(List_pod)
+# get pods NAME in a project 
+list_pod = []
+for x in range(len(listpod)):
+    a = listpod[x].split("/")[1]
+    list_pod.append(a)
+
+print("pods in Namespace: %s" % Namespace)
+print(list_pod)
 print("*"*20)
+
+exit()
 
 # get docker ID's and NAME's mapping
-CMD = 'docker ps --format "{{.ID}}\t{{.Names}}"'
-DOCKERS = os.popen(CMD).read()
+cmd = 'docker ps --format "{{.ID}}\t{{.Names}}"'
+DOCKERS = subprocess.getoutput(cmd)
+print(DOCKERS)
+
+
+
 DICT_ID = {}
 for ID in StringIO.StringIO(DOCKERS):
     items = ID.split()
